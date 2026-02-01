@@ -10,6 +10,9 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    features:[{
+      type:String
+    }]
   },
   { timestamps: true }
 );

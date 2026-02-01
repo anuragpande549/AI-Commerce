@@ -13,6 +13,19 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  // State to capture form data
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    address: "",
+    city: "",
+    zip: "",
+  });
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   if (cart.length === 0) {
     return (
       <>
@@ -25,13 +38,41 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (!formData.name || !formData.email) {
+      alert("Please fill in your details.");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      clearCart();
-      router.push("/");
-      alert("Order placed successfully!");
-    }, 2000);
+
+    try {
+      // 1. Send data to your API
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          cartItems: cart, // Sending cart items (even if your current model doesn't save them yet)
+          total: total,
+        }),
+      });
+
+      if (res.ok) {
+        // 2. Clear cart and redirect on success
+        clearCart();
+        router.push("/");
+        alert("Order placed successfully!");
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Failed to connect to the server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,11 +85,36 @@ export default function CheckoutPage() {
           <h1 className="text-3xl font-bold">Checkout</h1>
 
           <div className="space-y-4">
-            <Input placeholder="Full Name" />
-            <Input placeholder="Email Address" />
-            <Input placeholder="Shipping Address" />
-            <Input placeholder="City" />
-            <Input placeholder="Zip Code" />
+            <Input
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleInputChange}
+            />
+            <Input
+              name="email"
+              placeholder="Email Address"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+            <Input
+              name="address"
+              placeholder="Shipping Address"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+            <Input
+              name="city"
+              placeholder="City"
+              value={formData.city}
+              onChange={handleInputChange}
+            />
+            <Input
+              name="zip"
+              placeholder="Zip Code"
+              value={formData.zip}
+              onChange={handleInputChange}
+            />
           </div>
         </div>
 
@@ -62,7 +128,7 @@ export default function CheckoutPage() {
                 <span>
                   {item.name} × {item.qty}
                 </span>
-                <span>${item.price * item.qty}</span>
+                <span>${(item.price * item.qty).toFixed(2)}</span>
               </div>
             ))}
           </div>

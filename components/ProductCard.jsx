@@ -14,7 +14,7 @@ export default function ProductCard({ product }) {
       {/* Image */}
       <div
         className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer"
-        onClick={() => router.push(`/product/${product.id}`)}
+        onClick={() => router.push(`/product/${product._id}`)}
       >
         <img
           src={product.image}
